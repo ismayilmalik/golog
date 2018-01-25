@@ -1,0 +1,2 @@
+# golog
+Simple log package for golang
