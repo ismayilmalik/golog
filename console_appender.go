@@ -7,29 +7,29 @@ import (
 	"errors"
 )
 
-type ConsoleAppender struct {
-	mutex sync.Mutex
+type consoleAppender struct {
+	lock sync.Mutex
 	ready bool
 	disposed bool
 }
 
-func (c *ConsoleAppender) ID() string {
+func (c *consoleAppender) ID() string {
 	return "ConsoleAppender"
 }
 
-func (c *ConsoleAppender) Struct() error {
+func (c *consoleAppender) Construct() error {
 	if c.ready {
 		return nil
 	}
 
-	c.mutex.Lock()
+	c.lock.Lock()
 	c.ready = true
-	c.mutex.Unlock()
+	c.lock.Unlock()
 
 	return nil
 }
 
-func (c *ConsoleAppender) Write(buffer []byte) (int, error) {
+func (c *consoleAppender) Write(buffer []byte) (int, error) {
 	if !c.ready {
 		return -1, errors.New(fmt.Sprintf("%s not ready.", c.ID()))
 	}
@@ -41,14 +41,20 @@ func (c *ConsoleAppender) Write(buffer []byte) (int, error) {
 	return os.Stdout.Write(buffer)
 }
 
-func (c *ConsoleAppender) Dispose() error {
+func (c *consoleAppender) Dispose() error {
 	if c.disposed {
 		return nil
 	}
 
-	c.mutex.Lock()
+	c.lock.Lock()
 	c.disposed = true
-	c.mutex.Unlock()
+	c.lock.Unlock()
 
 	return nil
+}
+
+func NewConsoleAppender() *consoleAppender {
+	appender := &consoleAppender{}
+	appender.Construct()
+	return appender
 }
